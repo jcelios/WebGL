@@ -351,7 +351,7 @@ export class Draw extends WebGLObject {
     this.useProgram();
     this.camera(timeParameter);
 
-    this.gl.drawArrays(this.primitives["lineLoop"], 0, 3);
+    this.gl.drawArrays(this.primitives["triangles"], 0, 3);
   }
 
   square(height, width, color, timeParameter) {
