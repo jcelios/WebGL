@@ -1,0 +1,20 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui;
+  background-color: dimgrey;
+}
+
+canvas {
+  padding: 0;
+  margin: 0;
+}
+
+fieldset {
+  padding: 2px;
+  border-color: black;
+}

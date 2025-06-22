@@ -1,12 +1,18 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>WebGL Demo</title>
     <script src="main.js" type="module"></script>
+    <link rel="stylesheet" href="style.css" />
   </head>
 
-  <body style="background-color: dimgrey;">
-    <canvas width="640" height="480"></canvas>
+  <body>
+    <div style="display: flex; align-items: top">
+      <canvas width="600" height="500" style="border: solid 1px black"></canvas>
+      <div id="sliders"></div>
+    </div>
+    <div id="controls2"></div>
+    <output></output>
   </body>
 </html>

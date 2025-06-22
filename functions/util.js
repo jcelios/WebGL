@@ -1,15 +1,149 @@
 export let l = console.log;
 export let indent = (n) => "\u00A0".repeat(2).repeat(n);
 export let bind = (a, b) => a[b].bind(a);
+export let randomInt = (range) => Math.floor(Math.random() * range);
 
 Object.prototype.print = function () {
   console.log(this);
   return this;
 };
 
+Array.prototype.toString = function toString() {
+  //l(...this.values());
+  let val = this.values();
+  return "[" + [...val].join(", ") + "]";
+};
+
+export let primitivesMap = (x) => {
+  let map = new Map([
+    ["points", 'POINTS'],
+    ["lines", 'LINES'],
+    ["lineStrip", 'LINE_STRIP'],
+    ["lineLoop", 'LINE_LOOP'],
+    ["triangles", 'TRIANGLES'],
+    ["triangleStrip", 'TRIANGLE_STRIP'],
+    ["tringleFan", 'TRIANGLE_FAN'],
+  ]);
+  return map.get(x);
+};
+
+export let enumMap = (x) => {
+  let map = new Map([
+    // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Constants
+    // https://github.com/greggman/twgl.js/blob/main/src/utils.js
+
+    // 0     = ZERO | POINT | NONE | NO_ERROR
+    // 1     = ONE | LINES | SYNC_FLUSH_COMMANDS_BIT
+    // 2777  = BLEND_EQUATION_RGB | BLEND_EQUATION_RGB
+    // 36662 = COPY_READ_BUFFER | COPY_READ_BUFFER_BINDING
+    // 36663 = COPY_WRITE_BUFFER | COPY_WRITE_BUFFER_BINDING
+    // 36006 = FRAMEBUFFER_BINDING | DRAW_FRAMEBUFFER_BINDING
+
+    ["0", "POINTS"],
+    ["1", "LINES"],
+    ["2", "LINE_LOOP"],
+    ["3", "LINE_STRIP"],
+    ["4", "TRIANGLES"],
+    ["5", "TRIANGLE_STRIP"],
+    ["6", "TRIANGLE_FAN"],
+    //
+    ["33984", "TEXTURE0"],
+    ["35044", "STATIC_DRAW"],
+    ["35048", "DYNAMIC_DRAW"],
+    ["34962", "ARRAY_BUFFER"],
+    ["34963", "ELEMENT_ARRAY_BUFFER"],
+    ["35345", "UNIFORM_BUFFER"],
+    ["35982", "TRANSFORM_FEEDBACK_BUFFER"],
+    ["36386", "TRANSFORM_FEEDBACK"],
+    ["35713", "COMPILE_STATUS"],
+    ["35714", "LINK_STATUS"],
+    ["35715", "VALIDATE_STATUS"],
+    ["35632", "FRAGMENT_SHADER"],
+    ["35633", "VERTEX_SHADER"],
+    ["35981", "SEPARATE_ATTRIBS"],
+    ["35718", "ACTIVE_UNIFORMS"],
+    ["35721", "ACTIVE_ATTRIBUTES"],
+    ["35971", "TRANSFORM_FEEDBACK_VARYINGS"],
+    ["35382", "ACTIVE_UNIFORM_BLOCKS"],
+    ["34660", "BUFFER_SIZE"],
+    ["35396", "UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER"],
+    ["35398", "UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER"],
+    ["35392", "UNIFORM_BLOCK_DATA_SIZE"],
+    ["35395", "UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES"],
+    // Returned from getError
+    //["0", "NO_ERROR"],
+    ["1280", "INVALID_ENUM"],
+    ["1281", "INVALID_VALUE"],
+    ["1282", "INVALID_OPERATION"],
+    ["1285", "OUT_OF_MEMORY"],
+    ["37442", "CONTEXT_LOST_WEBGL"],
+    //
+    ["5120", "BYTE"],
+    ["5121", "UNSIGNED_BYTE"],
+    ["5122", "SHORT"],
+    //
+    ["5126", "FLOAT"],
+    ["35664", "FLOAT_VEC2"],
+    ["35665", "FLOAT_VEC3"],
+    ["35666", "FLOAT_VEC4"],
+    //
+    ["5124", "INT"],
+    ["35667", "INT_VEC2"],
+    ["35668", "INT_VEC3"],
+    ["35669", "INT_VEC4"],
+    //
+    ["5125", "UNSIGNED_INT"],
+    ["36294", "UNSIGNED_INT_VEC2"],
+    ["36295", "UNSIGNED_INT_VEC3"],
+    ["36296", "UNSIGNED_INT_VEC4"],
+    //
+    ["35670", "BOOL"],
+    ["35671", "BOOL_VEC2"],
+    ["35672", "BOOL_VEC3"],
+    ["35673", "BOOL_VEC4"],
+    //
+    ["35674", "FLOAT_MAT2"],
+    ["35675", "FLOAT_MAT3"],
+    ["35676", "FLOAT_MAT4"],
+    //
+    ["35685", "FLOAT_MAT2x3"],
+    ["35686", "FLOAT_MAT2x4"],
+    ["35687", "FLOAT_MAT3x2"],
+    ["35688", "FLOAT_MAT3x4"],
+    ["35689", "FLOAT_MAT4x2"],
+    ["35690", "FLOAT_MAT4x3"],
+    //
+    ["35678", "SAMPLER_2D"],
+    ["35680", "SAMPLER_CUBE"],
+    ["35679", "SAMPLER_3D"],
+    ["35682", "SAMPLER_2D_SHADOW"],
+    ["36289", "SAMPLER_2D_ARRAY"],
+    ["36292", "SAMPLER_2D_ARRAY_SHADOW"],
+    ["36293", "SAMPLER_CUBE_SHADOW"],
+    //
+    ["36298", "INT_SAMPLER_2D"],
+    ["36299", "INT_SAMPLER_3D"],
+    ["36300", "INT_SAMPLER_CUBE"],
+    ["36303", "INT_SAMPLER_2D_ARRAY"],
+    //
+    ["36306", "UNSIGNED_INT_SAMPLER_2D"],
+    ["36307", "UNSIGNED_INT_SAMPLER_3D"],
+    ["36308", "UNSIGNED_INT_SAMPLER_CUBE"],
+    ["36311", "UNSIGNED_INT_SAMPLER_2D_ARRAY"],
+    //
+    ["3553", "TEXTURE_2D"],
+    ["34067", "TEXTURE_CUBE_MAP"],
+    ["32879", "TEXTURE_3D"],
+    ["35866", "TEXTURE_2D_ARRAY"],
+  ]);
+  return map.get(x.toString());
+};
+
 export let sRGB = (color) => {
-  if (!Array.isArray(color)) return namedColor(color).concat(1);
-  else return color;
+  if (!Array.isArray(color)) {
+    if (color == "transparent") return [0, 0, 0, 0];
+    else return namedColor(color).concat(1);
+  } else return color;
 };
 
 export function namedColor(color) {
@@ -215,4 +349,12 @@ export function namedColor(color) {
   if (typeof color == "string" && NamedColors.has(color))
     color = NamedColors.get(color);
   return color;
+}
+
+export function radToDeg(r) {
+  return (r * 180) / Math.PI;
+}
+
+export function degToRad(d) {
+  return (d * Math.PI) / 180;
 }
