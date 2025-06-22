@@ -1,5 +1,5 @@
 import { l, indent, radToDeg, degToRad, randomInt, bind, enumMap, primitivesMap, namedColor, sRGB } from "./functions/util.js";
-import { Slider } from "./sliders.js";
+import { Slider } from "./functions/sliders.js";
 import { Logger } from "./functions/logger.js";
 import { Mat3, Mat4, Vec3, Vec4 } from "./functions/matrix.js";
 import { Context, WebGLObject, Context3D, Context2D, SceneGraphNode } from "./gl/context.js";

@@ -16,9 +16,9 @@ import {
   enumMap,
   SceneGraphNode,
 } from "./imports.js";
-import * as Shapes from "../functions/shapes.js";
+import * as Shapes from "./functions/shapes.js";
 
-import {} from "./sliders.js";
+import {} from "./functions/sliders.js";
 
 // https://webgl2fundamentals.org/
 
@@ -1187,21 +1187,13 @@ function test3D() {
     },
   });
 
+
   moon.drawTrail();
 
   ctx.objectMatrices = (object, i, deltaTime) => {
     deltaTime = deltaTime ?? 1;
 
-    // if (ctx.animated) {
-    //   switch (object.name) {
-    //     case "cube2":
-    //       rotation = [-time, time, 0];
-    //     case "sphere":
-    //       rotation = [time, time, 0];
-    //     case "cone":
-    //       rotation = [time, -time, 0];
-    //   }
-    // }
+    ctx.controls.statsDisplay(earthOrbit.orientation[1]);
 
     let viewProjectionMatrix = ctx.globalMatrices().viewProjectionMatrix;
     if (object.deformation.vertices.length) {
@@ -1258,7 +1250,8 @@ function test3D() {
     moon.yRotate(-0.5 * deltaTime);
 
     // Update all world matrices in the scene graph
-    ctx.world.updateWorldMatrix();
+    solarSystem.updateWorldMatrix();
+    //ctx.world.updateWorldMatrix();
 
     let worldMatrix = object.node.worldMatrix;
     let worldInverseMatrix = Mat4.inverse(worldMatrix);
@@ -1312,6 +1305,16 @@ function test3D() {
   ctx.draw();
   return ctx;
 }
-//test3D(); //.printObjects();
+test3D(); //.printObjects();
 
 SceneGraphNode.printTree();
+
+// let then = 0;
+// function render(now) {
+//   now *= 0.001;                          // convert to seconds
+//   const deltaTime = now - then;          // compute time since last frame
+//   then = now;                            // remember time for next frame
+
+//   requestAnimationFrame(render);
+// }
+// requestAnimationFrame(render);

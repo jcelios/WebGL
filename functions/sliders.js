@@ -1,4 +1,4 @@
-import { l } from "./imports.js";
+import { l } from "../imports.js";
 
 // let slidersDiv = document.querySelector("#sliders");
 // slidersDiv.style = "display: inline-block;text-align:right;";

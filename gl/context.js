@@ -825,6 +825,7 @@ export class Context3D extends Context {
       this.controls.radiobuttons();
       this.controls.checkboxes();
       this.controls.objectSelector();
+      this.controls.statsDisplay();
     }
   }
 
@@ -2780,6 +2781,26 @@ export class Context3D extends Context {
         //l(ctx.objectsToDraw.map((x) => x.name));
       });
     },
+    statsDisplay(angle) {
+      let overlay = document.querySelector("#overlay");
+      overlay.replaceChildren();
+
+      let now = this.ctx.time.now;
+      let fps = this.ctx.time.fps;
+      //let angle = earthOrbit.orientation[1];
+      // angle = angle % 360;
+
+      let time = document.createElement("div");
+      time.innerText = "Time: " + now.toFixed(2); // 2 decimal places
+
+      let FPS = document.createElement("div");
+      FPS.innerText = "FPS: " + fps.toFixed(1); // 1 decimal place
+
+      let angleNode = document.createElement("div");
+      angleNode.innerText = "Angle: " + angle?.toFixed(0); // no decimal place
+
+      overlay.append(time, FPS, angleNode);
+    },
   };
 
   UI = {
@@ -2847,6 +2868,7 @@ export class Context3D extends Context {
     now: 0,
     then: 0,
     deltaTime: 0,
+    fps: 0,
   };
   animate(drawFunction, now) {
     // Convert to Seconds:
@@ -2856,7 +2878,11 @@ export class Context3D extends Context {
     //l(now);
 
     // Subtract the Previous Time from the Current Time:
-    this.time.deltaTime = now - this.time.then;
+    //this.time.deltaTime = now - this.time.then;
+    let deltaTime = now - this.time.then;
+    this.time.deltaTime = deltaTime;
+    let fps = 1 / deltaTime;
+    if (fps !== Infinity) this.time.fps = fps;
 
     // Remember the Current Time for the next Frame:
     this.time.then = now;
@@ -2865,7 +2891,7 @@ export class Context3D extends Context {
     // let rotationSpeed = 1.2;
     // object.rotation[1] += rotationSpeed * deltaTime;
 
-    this.draw3D(drawFunction, this.time.deltaTime);
+    this.draw3D(drawFunction, deltaTime);
   }
   draw3D(drawFunction, deltaTime) {
     let gl = this.gl;
@@ -3018,8 +3044,31 @@ export class RenderObject {
     let matrix = this.node.worldMatrix;
     return [matrix[12], matrix[13], matrix[14]];
   }
+  get orientation() {
+    let matrix = this.node.worldMatrix;
+    return Math.asin(matrix[2]) / (Math.PI / 180);
+  }
+
   drawTrail() {
     this.history = [];
+
+    // let test = 0;
+
+    // test = test + this.context.time.deltaTime;
+
+    // l(test);
+
+    // for (let t = 0; t < 60; t = t + this.context.time.deltaTime) {
+    //   if (t % 1 == 0) {
+    //     this.history.push(this.location);
+    //     l(this.history);
+    //   }
+    //   // if (t % 1 == 0) {
+    //   //   this.context.objects.path(this.history, "purple");
+    //   //   this.history = [];
+    //   // }
+    // }
+
     let a = setInterval(() => this.history.push(this.location), 100);
 
     let b = setInterval(() => {
@@ -3031,7 +3080,7 @@ export class RenderObject {
       clearInterval(a);
       clearInterval(b);
       clearInterval(c);
-    }, 60000); 
+    }, 60000);
   }
 
   showBoundingBox() {
@@ -3115,30 +3164,6 @@ export class RenderObject {
     return this;
   }
 
-  // applyTransforms() {
-  //   let matrix = this.node.localMatrix;
-
-  //   let translation = this.transform.translation;
-  //   let rotation = this.transform.rotation;
-  //   let scale = this.transform.scale;
-
-  //   //l(scale);
-
-  //   // log.info("    Translation:", translation.toString());
-  //   matrix = Mat4.translate(matrix, ...translation);
-
-  //   // log.info("    Rotation:", rotation.toString());
-  //   matrix = Mat4.xRotate(matrix, rotation[0]);
-  //   matrix = Mat4.yRotate(matrix, rotation[1]);
-  //   matrix = Mat4.zRotate(matrix, rotation[2]);
-
-  //   // log.info("    Scale:", scale.toString());
-  //   //l(scale);
-  //   matrix = Mat4.scale(matrix, ...scale);
-
-  //   this.node.localMatrix = matrix;
-  //   this.node.updateWorldMatrix();
-  // }
   calculateDimensions() {
     let position = this.position.flat(Infinity);
 
@@ -3177,12 +3202,34 @@ export class Sphere extends RenderObject {
   }
 }
 
+let TRS = function () {
+  this.translation = [0, 0, 0];
+  this.rotation = [0, 0, 0];
+  this.scale = [1, 1, 1];
+};
+
+TRS.prototype.getMatrix = function (dst) {
+  dst = dst || new Array(16);
+  let t = this.translation;
+  let r = this.rotation;
+  let s = this.scale;
+
+  // compute a matrix from translation, rotation, and scale
+  dst = Mat4.translation(t[0], t[1], t[2]);
+  dst = Mat4.xRotate(dst, r[0]);
+  dst = Mat4.yRotate(dst, r[1]);
+  dst = Mat4.zRotate(dst, r[2]);
+  dst = Mat4.scale(dst, s[0], s[1], s[2]);
+  return dst;
+};
+
 export class SceneGraphNode {
-  constructor(name) {
+  constructor(name, source) {
     this.name = name;
     this.children = [];
     this.localMatrix = Mat4.identity();
     this.worldMatrix = Mat4.identity();
+    this.source = source;
 
     this.UINode = false;
 
@@ -3230,6 +3277,23 @@ export class SceneGraphNode {
       this.children.forEach((x) => x.print(indentN + 1, string));
     }
     return this;
+  }
+
+  get location() {
+    let matrix = this.worldMatrix;
+    return [matrix[12], matrix[13], matrix[14]];
+  }
+  get orientation() {
+    let x = this.location[0];
+    let y = this.location[1];
+    let z = this.location[2];
+
+    let Rx = Math.atan2(z, y) / (Math.PI / 180);
+    let Ry = Math.atan2(z, x) / (Math.PI / 180);
+    let Rz = Math.atan2(y, x) / (Math.PI / 180);
+
+    return [Rx, Ry, Rz];
+    //return Math.asin(matrix[2]);
   }
 
   translate(tx, ty, tz) {
@@ -3297,6 +3361,11 @@ export class SceneGraphNode {
   }
 
   updateWorldMatrix(parentWorldMatrix) {
+    let source = this.source;
+    if (source) {
+      source.getMatrix(this.localMatrix);
+    }
+
     if (parentWorldMatrix) {
       // a matrix was passed in so do the math and store the result in `this.worldMatrix`.
       this.worldMatrix = Mat4.multiply(parentWorldMatrix, this.localMatrix);
